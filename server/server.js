@@ -7,8 +7,9 @@ import Koa from "koa";
 import next from "next";
 import Router from "koa-router";
 import session from "koa-session";
-const { receiveWebhook } = require("@shopify/koa-shopify-webhooks");
 import * as handlers from "./handlers/index";
+import { receiveWebhook } from "@shopify/koa-shopify-webhooks";
+
 dotenv.config();
 const port = parseInt(process.env.PORT, 10) || 8081;
 const dev = process.env.NODE_ENV !== "production";
@@ -20,6 +21,10 @@ const { SHOPIFY_API_SECRET, SHOPIFY_API_KEY, SCOPES } = process.env;
 app.prepare().then(() => {
   const server = new Koa();
   const router = new Router();
+  const webhook = receiveWebhook({
+    secret: SHOPIFY_API_SECRET,
+  });
+
   server.use(
     session(
       {
@@ -40,11 +45,6 @@ app.prepare().then(() => {
         //Auth token and shop available in session
         //Redirect to shop upon auth
         const { shop, accessToken } = ctx.session;
-        ctx.cookies.set("shopOrigin", shop, {
-          httpOnly: false,
-          secure: true,
-          sameSite: "none",
-        });
         await handlers.registerWebhooks(
           shop,
           accessToken,
@@ -52,20 +52,26 @@ app.prepare().then(() => {
           "/webhooks/products/create",
           ApiVersion.October19
         );
+
+        ctx.cookies.set("shopOrigin", shop, {
+          httpOnly: false,
+          secure: true,
+          sameSite: "none",
+        });
         ctx.client = handlers.createClient(shop, accessToken);
         await handlers.getSubscriptionUrl(ctx);
       },
     })
   );
-  const webhook = receiveWebhook({ secret: SHOPIFY_API_SECRET });
-  router.post("/webhooks/products/create", webhook, (ctx) => {
-    console.log("received webhook: ", ctx.state.webhook);
-  });
   server.use(
     graphQLProxy({
       version: ApiVersion.October19,
     })
   );
+  router.post("/webhooks/products/create", webhook, (ctx) => {
+    console.log("received webhook: ", ctx.state.webhook);
+  });
+
   router.get("*", verifyRequest(), async (ctx) => {
     await handle(ctx.req, ctx.res);
     ctx.respond = false;
