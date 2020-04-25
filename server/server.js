@@ -7,12 +7,13 @@ import Koa from "koa";
 import next from "next";
 import Router from "koa-router";
 import session from "koa-session";
+const { receiveWebhook } = require("@shopify/koa-shopify-webhooks");
 import * as handlers from "./handlers/index";
 dotenv.config();
 const port = parseInt(process.env.PORT, 10) || 8081;
 const dev = process.env.NODE_ENV !== "production";
 const app = next({
-  dev
+  dev,
 });
 const handle = app.getRequestHandler();
 const { SHOPIFY_API_SECRET, SHOPIFY_API_KEY, SCOPES } = process.env;
@@ -23,7 +24,7 @@ app.prepare().then(() => {
     session(
       {
         sameSite: "none",
-        secure: true
+        secure: true,
       },
       server
     )
@@ -42,18 +43,30 @@ app.prepare().then(() => {
         ctx.cookies.set("shopOrigin", shop, {
           httpOnly: false,
           secure: true,
-          sameSite: "none"
+          sameSite: "none",
         });
-        ctx.redirect("/");
-      }
+        await handlers.registerWebhooks(
+          shop,
+          accessToken,
+          "PRODUCTS_CREATE",
+          "/webhooks/products/create",
+          ApiVersion.October19
+        );
+        ctx.client = handlers.createClient(shop, accessToken);
+        await handlers.getSubscriptionUrl(ctx);
+      },
     })
   );
+  const webhook = receiveWebhook({ secret: SHOPIFY_API_SECRET });
+  router.post("/webhooks/products/create", webhook, (ctx) => {
+    console.log("received webhook: ", ctx.state.webhook);
+  });
   server.use(
     graphQLProxy({
-      version: ApiVersion.October19
+      version: ApiVersion.October19,
     })
   );
-  router.get("*", verifyRequest(), async ctx => {
+  router.get("*", verifyRequest(), async (ctx) => {
     await handle(ctx.req, ctx.res);
     ctx.respond = false;
     ctx.res.statusCode = 200;

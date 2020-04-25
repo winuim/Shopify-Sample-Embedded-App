@@ -1,5 +1,5 @@
 {
-  "name": "shopify-node-app",
+  "name": "shopify-sample-embedded-app",
   "version": "1.0.0",
   "description": "Shopify's node app for CLI tool",
   "scripts": {
@@ -41,7 +41,8 @@
     "next-env": "^1.1.1",
     "react": "^16.13.1",
     "react-apollo": "^3.1.5",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "store-js": "^2.0.4"
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.9.0",
