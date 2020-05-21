@@ -4,9 +4,9 @@
   "description": "Shopify's node app for CLI tool",
   "scripts": {
     "test": "jest",
-    "dev": "NODE_ENV=development nodemon ./server/index.js --watch ./server/index.js",
-    "build": "next build",
-    "start": "NODE_ENV=production node ./server/index.js"
+    "dev": "NODE_ENV=development nodemon",
+    "build": "next build && tsc --project tsconfig.server.json",
+    "start": "cross-env NODE_ENV=production node dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -22,6 +22,7 @@
     "@babel/polyfill": "^7.8.7",
     "@babel/preset-env": "^7.9.6",
     "@babel/register": "^7.9.0",
+    "@koa/router": "^8.0.8",
     "@shopify/app-bridge-react": "^1.21.4",
     "@shopify/app-cli-node-generator-helper": "^1.2.1",
     "@shopify/koa-shopify-auth": "^3.1.61",
@@ -30,6 +31,7 @@
     "@shopify/polaris": "^4.22.0",
     "@zeit/next-css": "^1.0.1",
     "apollo-boost": "^0.4.9",
+    "cross-env": "^7.0.2",
     "dotenv": "^8.2.0",
     "graphql": "^15.0.0",
     "isomorphic-fetch": "^2.2.1",
@@ -47,6 +49,13 @@
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.9.6",
     "@babel/preset-stage-3": "^7.8.3",
+    "@types/js-cookie": "^2.2.6",
+    "@types/koa": "^2.11.3",
+    "@types/koa-session": "^5.10.2",
+    "@types/koa__router": "^8.0.2",
+    "@types/node": "^14.0.4",
+    "@types/react": "^16.9.35",
+    "@types/react-dom": "16.9.8",
     "babel-jest": "26.0.1",
     "babel-register": "^6.26.0",
     "enzyme": "3.11.0",
@@ -57,7 +66,9 @@
     "nodemon": "^2.0.4",
     "prettier": "2.0.5",
     "react-addons-test-utils": "15.6.2",
-    "react-test-renderer": "16.13.1"
+    "react-test-renderer": "16.13.1",
+    "ts-node": "^8.10.1",
+    "typescript": "3.8.3"
   },
   "husky": {
     "hooks": {

@@ -1,7 +1,9 @@
 import "isomorphic-fetch";
 import { gql } from "apollo-boost";
 
-export function RECURRING_CREATE(url) {
+import { KoaApolloClient } from "server";
+
+export function RECURRING_CREATE(url: string) {
   return gql`
     mutation {
       appSubscriptionCreate(
@@ -38,11 +40,11 @@ export function RECURRING_CREATE(url) {
     }`;
 }
 
-export const getSubscriptionUrl = async ctx => {
+export const getSubscriptionUrl = async (ctx: KoaApolloClient) => {
   const { client } = ctx;
   const confirmationUrl = await client
     .mutate({
-      mutation: RECURRING_CREATE(process.env.HOST)
+      mutation: RECURRING_CREATE(process.env.HOST ?? "")
     })
     .then(response => response.data.appSubscriptionCreate.confirmationUrl);
 

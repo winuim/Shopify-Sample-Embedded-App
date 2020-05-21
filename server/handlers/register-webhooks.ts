@@ -1,18 +1,19 @@
-import { registerWebhook } from "@shopify/koa-shopify-webhooks";
+import { registerWebhook, Topic } from "@shopify/koa-shopify-webhooks";
+import { ApiVersion } from "@shopify/koa-shopify-webhooks/dist/src/register";
 
 export const registerWebhooks = async (
-  shop,
-  accessToken,
-  type,
-  url,
-  apiVersion
+  shop: string,
+  accessToken: string,
+  type: Topic,
+  url: string,
+  apiVersion: ApiVersion
 ) => {
   const registration = await registerWebhook({
     address: `${process.env.HOST}${url}`,
     topic: type,
     accessToken,
     shop,
-    apiVersion
+    apiVersion,
   });
 
   if (registration.success) {
