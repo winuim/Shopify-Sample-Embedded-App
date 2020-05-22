@@ -1,12 +1,6 @@
-declare var API_KEY: string;
-
-import gql from "graphql-tag";
-import Cookies from "js-cookie";
 import React from "react";
+import gql from "graphql-tag";
 import { Query } from "react-apollo";
-import store from "store-js";
-import createApp from "@shopify/app-bridge";
-import { Redirect } from "@shopify/app-bridge/actions";
 import {
   Card,
   ResourceList,
@@ -14,6 +8,10 @@ import {
   TextStyle,
   Thumbnail,
 } from "@shopify/polaris";
+import store from "store-js";
+import { Redirect } from "@shopify/app-bridge/actions";
+import Cookies from "js-cookie";
+import createApp from "@shopify/app-bridge";
 
 interface ProductImageNode {
   originalSrc: string;
@@ -87,8 +85,7 @@ const GET_PRODUCTS_BY_ID = gql`
   }
 `;
 
-
-export default function ResourceListWithProducts() {
+function ResourceListWithProducts() {
   const shopOrigin = Cookies.get("shopOrigin") ?? "error";
   const app = createApp({
     apiKey: API_KEY,
@@ -98,7 +95,9 @@ export default function ResourceListWithProducts() {
     const redirect = Redirect.create(app);
     redirect.dispatch(Redirect.Action.APP, "/edit-products");
   };
+
   const twoWeeksFromNow = new Date(Date.now() + 12096e5).toDateString();
+
   return (
     <Query<ProductData, ProductVars>
       query={GET_PRODUCTS_BY_ID}
@@ -170,3 +169,5 @@ export default function ResourceListWithProducts() {
     </Query>
   );
 }
+
+export default ResourceListWithProducts;

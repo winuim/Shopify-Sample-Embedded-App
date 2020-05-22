@@ -5,7 +5,7 @@
   "scripts": {
     "test": "jest",
     "dev": "cross-env NODE_ENV=development nodemon",
-    "build": "next build && tsc --project tsconfig.server.json",
+    "build": "next build && tsc --project tsconfig.server.json && cp server/index.js dist/",
     "start": "cross-env NODE_ENV=production node dist/index.js"
   },
   "repository": {
@@ -54,20 +54,20 @@
     "@types/koa-session": "^5.10.2",
     "@types/node": "^14.0.5",
     "@types/react": "^16.9.35",
-    "@types/react-dom": "16.9.8",
+    "@types/react-dom": "^16.9.8",
     "babel-jest": "26.0.1",
     "babel-register": "^6.26.0",
     "enzyme": "3.11.0",
     "enzyme-adapter-react-16": "1.15.2",
     "husky": "^4.2.5",
     "jest": "26.0.1",
-    "lint-staged": "^10.2.4",
+    "lint-staged": "^10.2.6",
     "nodemon": "^2.0.4",
     "prettier": "2.0.5",
     "react-addons-test-utils": "15.6.2",
     "react-test-renderer": "16.13.1",
     "ts-node": "^8.10.1",
-    "typescript": "3.8.3"
+    "typescript": "^3.8.3"
   },
   "husky": {
     "hooks": {

@@ -12,7 +12,7 @@ import {
   TextStyle,
 } from "@shopify/polaris";
 
-export default function AnnotatedLayout(): JSX.Element {
+function AnnotatedLayout() {
   const [discount, setDiscount] = useState("10%");
   const [enabled, setEnabled] = useState(false);
   const contentStatus = enabled ? "Disable" : "Enable";
@@ -22,6 +22,7 @@ export default function AnnotatedLayout(): JSX.Element {
     setDiscount(discount);
     console.log("submission", discount);
   };
+
   const handleChange = (field: string) => {
     return (value: string | boolean) => {
       switch (field) {
@@ -38,6 +39,7 @@ export default function AnnotatedLayout(): JSX.Element {
       }
     };
   };
+  
   const handleToggle = () => {
     setEnabled(!enabled);
   };
@@ -86,3 +88,5 @@ export default function AnnotatedLayout(): JSX.Element {
     </Page>
   );
 }
+
+export default AnnotatedLayout;

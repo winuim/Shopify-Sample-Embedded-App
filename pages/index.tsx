@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import store from "store-js";
-import { ResourcePicker, TitleBar } from "@shopify/app-bridge-react";
-import { SelectPayload } from "@shopify/app-bridge-react/components/ResourcePicker/ResourcePicker";
 import { EmptyState, Layout, Page } from "@shopify/polaris";
+import { ResourcePicker, TitleBar } from "@shopify/app-bridge-react";
+import store from "store-js";
+import { SelectPayload } from "@shopify/app-bridge-react/components/ResourcePicker/ResourcePicker";
 
 import ResourceListWithProducts from "../components/ResourceList";
 
 const img = "https://cdn.shopify.com/s/files/1/0757/9955/files/empty-state.svg";
 
-export default function Index(): JSX.Element {
+function Index() {
   const [open, setValue] = useState(false);
   const emptyState = !store.get("ids");
 
@@ -53,3 +53,5 @@ export default function Index(): JSX.Element {
     </Page>
   );
 }
+
+export default Index;

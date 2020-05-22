@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   Banner,
   Card,
@@ -14,7 +15,6 @@ import {
 import store from "store-js";
 import gql from "graphql-tag";
 import { Mutation } from "react-apollo";
-import React, { useState, useEffect } from "react";
 
 interface Product {
   title: string;
@@ -44,7 +44,7 @@ const UPDATE_PRICE = gql`
   }
 `;
 
-export default function EditProduct() {
+function EditProduct() {
   const [name, setName] = useState("");
   const [discount, setDiscount] = useState("");
   const [price, setPrice] = useState("");
@@ -143,3 +143,5 @@ export default function EditProduct() {
     </Mutation>
   );
 }
+
+export default EditProduct;

@@ -1,16 +1,13 @@
-declare var API_KEY: string;
-
-import "@shopify/polaris/styles.css";
-
-import ApolloClient from "apollo-boost";
-import Cookies from "js-cookie";
+import React from "react";
 import { AppProps } from "next/app";
 import Head from "next/head";
-import React from "react";
 import { ApolloProvider } from "react-apollo";
 import { Provider } from "@shopify/app-bridge-react";
-import { AppProvider } from "@shopify/polaris";
+import Cookies from "js-cookie";
+import "@shopify/polaris/styles.css";
 import translations from "@shopify/polaris/locales/en.json";
+import ApolloClient from "apollo-boost";
+import { AppProvider } from "@shopify/polaris";
 
 const client = new ApolloClient({
   fetchOptions: {
@@ -18,7 +15,7 @@ const client = new ApolloClient({
   },
 });
 
-export default function MyApp({ Component, pageProps }: AppProps): JSX.Element {
+function MyApp({ Component, pageProps }: AppProps) {
   const config = {
     apiKey: API_KEY,
     shopOrigin: Cookies.get("shopOrigin") ?? "error",
@@ -41,3 +38,5 @@ export default function MyApp({ Component, pageProps }: AppProps): JSX.Element {
     </React.Fragment>
   );
 }
+
+export default MyApp;
