@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import gql from "graphql-tag";
 import store from "store-js";
-import { useQuery } from '@apollo/react-hooks';
+import { useQuery } from "@apollo/react-hooks";
 import { EmptyState, Layout, Page } from "@shopify/polaris";
 import { ResourcePicker, TitleBar } from "@shopify/app-bridge-react";
 import { SelectPayload } from "@shopify/app-bridge-react/components/ResourcePicker/ResourcePicker";
@@ -11,23 +11,23 @@ import ResourceListWithProducts from "../components/ResourceList";
 const img = "https://cdn.shopify.com/s/files/1/0757/9955/files/empty-state.svg";
 
 const GET_SHOP_INFOMATION = gql`
-query {
-  shop {
-    id
-    name
-    email
+  query {
+    shop {
+      id
+      name
+      email
+    }
   }
-}
 `;
 
 interface ShopInformation {
-  "id": string,
-  "name": string,
-  "email": string
+  id: string;
+  name: string;
+  email: string;
 }
 
 interface ShopData {
-  "shop": ShopInformation
+  shop: ShopInformation;
 }
 
 function Index() {
@@ -40,13 +40,11 @@ function Index() {
     store.set("ids", idsFromResources);
   };
 
-  const { loading, data, error } = useQuery<ShopData>(
-    GET_SHOP_INFOMATION
-  );
+  const { loading, data, error } = useQuery<ShopData>(GET_SHOP_INFOMATION);
   const [shopInfo, setShopInfo] = useState<ShopInformation>({
-    "id": "",
-    "name": "",
-    "email": ""  
+    id: "",
+    name: "",
+    email: "",
   });
 
   useEffect(() => {
@@ -55,18 +53,14 @@ function Index() {
       console.log("shopId: " + data.shop.id);
     }
     if (error) {
-      alert(error.message);
+      console.log(error.message);
     }
-  },[loading, data]);
+  }, [loading, data]);
 
   return (
     <Page>
       <TitleBar
-        title={loading ? (
-          "Shopify app with Node and React 🎉"
-        ):(
-          shopInfo.name
-        )}
+        title={loading ? "Shopify app with Node and React 🎉" : shopInfo.name}
         primaryAction={{
           content: "Select products",
           onAction: () => setValue(true),
