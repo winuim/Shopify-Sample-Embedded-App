@@ -66,7 +66,8 @@ app.prepare().then(() => {
           Register.ApiVersion.April20
         );
         ctx.client = handlers.createClient(shop, accessToken);
-        await handlers.getSubscriptionUrl(ctx);
+        // await handlers.getSubscriptionUrl(ctx);
+        ctx.redirect("/");
       },
     })
   );
