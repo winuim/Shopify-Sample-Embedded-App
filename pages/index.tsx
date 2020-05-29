@@ -20,14 +20,14 @@ const GET_SHOP_INFOMATION = gql`
   }
 `;
 
-interface ShopInformation {
+interface ShopInfo {
   id: string;
   name: string;
   email: string;
 }
 
 interface ShopData {
-  shop: ShopInformation;
+  shop: ShopInfo;
 }
 
 function Index() {
@@ -42,7 +42,7 @@ function Index() {
     setIdsLength(idsFromResources.length);
   };
 
-  const [shopInfo, setShopInfo] = useState<ShopInformation>();
+  const [shopInfo, setShopInfo] = useState<ShopInfo>();
   const [loadShopInfo, { called, loading, data, error }] = useLazyQuery<ShopData>(GET_SHOP_INFOMATION);
 
   useEffect(() => {
