@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
 import gql from "graphql-tag";
+import React, { useState, useEffect } from "react";
+import { useLazyQuery } from "react-apollo";
 import store from "store-js";
-import { useQuery } from "@apollo/react-hooks";
 import { EmptyState, Layout, Page } from "@shopify/polaris";
 import { ResourcePicker, TitleBar } from "@shopify/app-bridge-react";
 import { SelectPayload } from "@shopify/app-bridge-react/components/ResourcePicker/ResourcePicker";
@@ -40,27 +40,26 @@ function Index() {
     store.set("ids", idsFromResources);
   };
 
-  const { loading, data, error } = useQuery<ShopData>(GET_SHOP_INFOMATION);
-  const [shopInfo, setShopInfo] = useState<ShopInformation>({
-    id: "",
-    name: "",
-    email: "",
-  });
+  const [shopInfo, setShopInfo] = useState<ShopInformation>();
+  const [loadShopInfo, { called, loading, data, error }] = useLazyQuery<ShopData>(GET_SHOP_INFOMATION);
 
   useEffect(() => {
+    if (!called) {
+      loadShopInfo();
+    }
     if (loading === false && data) {
-      setShopInfo(data.shop);
       console.log("shopId: " + data.shop.id);
+      setShopInfo(data.shop);
     }
     if (error) {
       console.log(error.message);
     }
-  }, [loading, data]);
+  }, [called, loading]);
 
   return (
     <Page>
       <TitleBar
-        title={loading ? "Shopify app with Node and React 🎉" : shopInfo.name}
+        title={shopInfo ? shopInfo.name : "Shopify app with Node and React 🎉"}
         primaryAction={{
           content: "Select products",
           onAction: () => setValue(true),
