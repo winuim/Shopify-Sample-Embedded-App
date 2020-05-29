@@ -32,12 +32,14 @@ interface ShopData {
 
 function Index() {
   const [open, setValue] = useState(false);
-  const emptyState = !store.get("ids");
+  const ids: string[] | undefined = store.get("ids");
+  const [idsLength, setIdsLength] = useState(ids ? ids.length: 0);
 
   const handleSelection = (resources: SelectPayload) => {
     const idsFromResources = resources.selection.map((product) => product.id);
     setValue(false);
     store.set("ids", idsFromResources);
+    setIdsLength(idsFromResources.length);
   };
 
   const [shopInfo, setShopInfo] = useState<ShopInformation>();
@@ -72,7 +74,7 @@ function Index() {
         onSelection={handleSelection}
         onCancel={() => setValue(false)}
       />
-      {emptyState ? (
+      {idsLength == 0 ? (
         <Layout>
           <EmptyState
             heading="Discount your products temporarily"
