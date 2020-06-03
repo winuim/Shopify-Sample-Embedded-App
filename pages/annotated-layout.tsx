@@ -13,6 +13,7 @@ import {
   TextField,
   TextStyle,
 } from "@shopify/polaris";
+import { MetafieldValueTypes, Metafield } from "utils/gql-common";
 
 const GET_SHOP_METAFIELDS = gql`
 query	getShopMetafields($namespace: String!, $key: String!){
@@ -30,16 +31,6 @@ query	getShopMetafields($namespace: String!, $key: String!){
   }
 }
 `;
-
-type MetafieldValueTypes = "STRING" | "INTEGER" | "JSON_STRING"
-
-interface Metafield {
-  id: string;
-  namespace: string;
-  key: string;
-  valueType: MetafieldValueTypes;
-  value: string;
-}
 
 interface ShopInfo {
   id: string;
