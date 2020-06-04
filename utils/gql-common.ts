@@ -1,7 +1,7 @@
 export type MetafieldValueTypes = "STRING" | "INTEGER" | "JSON_STRING";
 
 export interface Metafield {
-  id: string;
+  id?: string;
   namespace: string;
   key: string;
   valueType: MetafieldValueTypes;

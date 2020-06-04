@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 import React, { useEffect, useState } from "react";
-import { useLazyQuery } from "react-apollo";
+import { useLazyQuery, useMutation } from "react-apollo";
 import { Page, Card, TextField, EmptyState, Layout } from "@shopify/polaris";
 
 import { PageInfo, Metafield } from "utils/gql-common";
@@ -36,7 +36,7 @@ interface CollectionNode {
   id: string;
   title: string;
   description: string;
-  metafield: Metafield | null;
+  metafield?: Metafield;
 }
 
 interface CollectionEdge {
@@ -57,8 +57,53 @@ interface CollectionsVars {
   key: string;
 }
 
+const UPDATE_COLLECTIONS_METAFIELDS = gql`
+  mutation collectionUpdate($input: CollectionInput!) {
+    collectionUpdate(input: $input) {
+      collection {
+        id
+      }
+      job {
+        id
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+interface UpdateResultUserErrors {
+  field: string[];
+  message: string;
+}
+
+interface UpdateResult {
+  collection?: {
+    id: string;
+  };
+  job?: {
+    id: string;
+  };
+  userErrors: UpdateResultUserErrors[];
+}
+
+interface UpdateInputVars {
+  id: string;
+  metafields: Metafield;
+}
+
+interface CollectionState {
+  id: string;
+  title: string;
+  description: string;
+  metafieldId?: string | null;
+  value?: string | null;
+}
+
 function CollectionsPage() {
-  const [collectionInfo, setCollectionInfo] = useState<CollectionInfo>();
+  const [values, setValues] = useState<CollectionState[]>([]);
   const [loadCollectionsInfo, { called, loading, data, error }] = useLazyQuery<
     CollectionsData,
     CollectionsVars
@@ -68,6 +113,27 @@ function CollectionsPage() {
       key: "discount_percentage",
     },
   });
+  const [
+    saveCollectionInfo,
+    { error: updated_error, data: updated_data },
+  ] = useMutation<
+    { collectionUpdate: UpdateResult },
+    { input: UpdateInputVars }
+  >(UPDATE_COLLECTIONS_METAFIELDS);
+  if (updated_data && updated_data.collectionUpdate) {
+    console.log("Sucessfully updated");
+  }
+  if (updated_error) {
+    if (updated_error.message) {
+      console.log(updated_error.message);
+    }
+    if (updated_error.graphQLErrors) {
+      console.log(updated_error.graphQLErrors);
+    }
+    if (updated_error.networkError) {
+      console.log(updated_error.networkError);
+    }
+  }
 
   useEffect(() => {
     if (!called) {
@@ -75,7 +141,17 @@ function CollectionsPage() {
     }
     if (loading === false && data) {
       console.log(data);
-      setCollectionInfo(data.collections);
+      const result = data.collections.edges.map((edge) => {
+        return {
+          id: edge.node.id,
+          title: edge.node.title,
+          description: edge.node.description,
+          metafieldId: edge.node.metafield ? edge.node.metafield.id : null,
+          value: edge.node.metafield ? edge.node.metafield.value : null,
+        };
+      });
+      console.log(result);
+      setValues(result);
     }
     if (error) {
       console.log(error.message);
@@ -84,28 +160,53 @@ function CollectionsPage() {
 
   return (
     <Page title="Collections">
-      {collectionInfo === undefined ? (
+      {values.length == 0 ? (
         <Layout>
           <EmptyState image={img}></EmptyState>
         </Layout>
       ) : (
         <Layout>
-          {collectionInfo.edges.map((edge) => {
+          {values.map((value, index) => {
             return (
               <Layout.AnnotatedSection
-                title={edge.node.title}
-                description={edge.node.description}
-                key={edge.node.id}
+                title={value.title}
+                description={value.description}
+                key={value.id}
               >
                 <Card
                   sectioned
                   secondaryFooterActions={[{ content: "Clear Value" }]}
-                  primaryFooterAction={{ content: "Save Value" }}
+                  primaryFooterAction={{
+                    content: "Save Value",
+                    onAction: () => {
+                      const inputData: UpdateInputVars = {
+                        id: value.id,
+                        metafields: {
+                          namespace: "tutorial",
+                          key: "discount_percentage",
+                          value: value.value ?? "10",
+                          valueType: "INTEGER",
+                        },
+                      }
+                      if (value.metafieldId) {
+                        inputData.metafields.id = value.metafieldId;
+                      }
+                      saveCollectionInfo({
+                        variables: {
+                          input: inputData,
+                        },
+                      });
+                    },
+                  }}
                 >
                   <TextField
                     label="value"
-                    onChange={() => {}}
-                    value={edge.node.metafield?.value}
+                    onChange={(e) => {
+                      const newValues = values.slice(0);
+                      values[index].value = e;
+                      setValues(newValues);
+                    }}
+                    value={value.value ?? ""}
                   />
                 </Card>
               </Layout.AnnotatedSection>
