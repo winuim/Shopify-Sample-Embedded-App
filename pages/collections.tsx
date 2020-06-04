@@ -1,7 +1,15 @@
 import gql from "graphql-tag";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useLazyQuery, useMutation } from "react-apollo";
-import { Page, Card, TextField, EmptyState, Layout } from "@shopify/polaris";
+import {
+  Page,
+  Card,
+  TextField,
+  EmptyState,
+  Layout,
+  Toast,
+  Frame,
+} from "@shopify/polaris";
 
 import { PageInfo, Metafield } from "utils/gql-common";
 
@@ -103,6 +111,11 @@ interface CollectionState {
 }
 
 function CollectionsPage() {
+  const [active, setActive] = useState(false);
+  const toggleActive = useCallback(() => setActive((active) => !active), []);
+  const toastMarkup = active ? (
+    <Toast content="Sucessfully updated" onDismiss={toggleActive} />
+  ) : null;
   const [values, setValues] = useState<CollectionState[]>([]);
   const [loadCollectionsInfo, { called, loading, data, error }] = useLazyQuery<
     CollectionsData,
@@ -120,20 +133,6 @@ function CollectionsPage() {
     { collectionUpdate: UpdateResult },
     { input: UpdateInputVars }
   >(UPDATE_COLLECTIONS_METAFIELDS);
-  if (updated_data && updated_data.collectionUpdate) {
-    console.log("Sucessfully updated");
-  }
-  if (updated_error) {
-    if (updated_error.message) {
-      console.log(updated_error.message);
-    }
-    if (updated_error.graphQLErrors) {
-      console.log(updated_error.graphQLErrors);
-    }
-    if (updated_error.networkError) {
-      console.log(updated_error.networkError);
-    }
-  }
 
   useEffect(() => {
     if (!called) {
@@ -159,62 +158,75 @@ function CollectionsPage() {
   }, [called, loading]);
 
   return (
-    <Page title="Collections">
-      {values.length == 0 ? (
-        <Layout>
-          <EmptyState image={img}></EmptyState>
-        </Layout>
-      ) : (
-        <Layout>
-          {values.map((value, index) => {
-            return (
-              <Layout.AnnotatedSection
-                title={value.title}
-                description={value.description}
-                key={value.id}
-              >
-                <Card
-                  sectioned
-                  secondaryFooterActions={[{ content: "Clear Value" }]}
-                  primaryFooterAction={{
-                    content: "Save Value",
-                    onAction: () => {
-                      const inputData: UpdateInputVars = {
-                        id: value.id,
-                        metafields: {
-                          namespace: "tutorial",
-                          key: "discount_percentage",
-                          value: value.value ?? "10",
-                          valueType: "INTEGER",
-                        },
-                      }
-                      if (value.metafieldId) {
-                        inputData.metafields.id = value.metafieldId;
-                      }
-                      saveCollectionInfo({
-                        variables: {
-                          input: inputData,
-                        },
-                      });
-                    },
-                  }}
+    <Frame>
+      <Page title="Collections">
+        {values.length == 0 ? (
+          <Layout>
+            <EmptyState image={img}></EmptyState>
+          </Layout>
+        ) : (
+          <Layout>
+            {toastMarkup}
+            {values.map((value, index) => {
+              return (
+                <Layout.AnnotatedSection
+                  title={value.title}
+                  description={value.description}
+                  key={value.id}
                 >
-                  <TextField
-                    label="value"
-                    onChange={(e) => {
-                      const newValues = values.slice(0);
-                      values[index].value = e;
-                      setValues(newValues);
+                  <Card
+                    sectioned
+                    secondaryFooterActions={[{ content: "Clear Value" }]}
+                    primaryFooterAction={{
+                      content: "Save Value",
+                      onAction: () => {
+                        const inputData: UpdateInputVars = {
+                          id: value.id,
+                          metafields: {
+                            namespace: "tutorial",
+                            key: "discount_percentage",
+                            value: value.value ?? "10",
+                            valueType: "INTEGER",
+                          },
+                        };
+                        if (value.metafieldId) {
+                          inputData.metafields.id = value.metafieldId;
+                        }
+                        saveCollectionInfo({
+                          variables: {
+                            input: inputData,
+                          },
+                        }).then((result) => {
+                          if (result.data && result.data.collectionUpdate) {
+                            console.log("Sucessfully updated");
+                            toggleActive();
+                          }
+                          if (result.errors) {
+                            result.errors.forEach(e => {
+                              console.log(e.message);
+                            })
+                          }
+                        });
+                      },
                     }}
-                    value={value.value ?? ""}
-                  />
-                </Card>
-              </Layout.AnnotatedSection>
-            );
-          })}
-        </Layout>
-      )}
-    </Page>
+                  >
+                    <TextField
+                      label="value"
+                      onChange={(e) => {
+                        const newValues = values.slice(0);
+                        values[index].value = e;
+                        setValues(newValues);
+                      }}
+                      value={value.value ?? ""}
+                    />
+                  </Card>
+                </Layout.AnnotatedSection>
+              );
+            })}
+          </Layout>
+        )}
+      </Page>
+    </Frame>
   );
 }
 
